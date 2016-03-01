@@ -89,14 +89,15 @@ class Igra():
 					poteze.add((False, roka_napadalca, roka_napadenega))
 					poteze_arr.append((False, roka_napadalca, roka_napadenega))
 				
-		# Če je možna delitev, dodamo še vse poteze z delitvijo
+		# Če je možna delitev, dodamo še vse poteze z delitvijo. Seveda so to
+		# vse možne kombinacije, zato preverjanje, ali je poteza veljavna, ni
+		# potrebno, oziroma je celo napačno.
 		self.je_veljavna_delitev()
 		if self.moznost_delitve:
 			for roka_napadalca in range(self.roke):
 				for roka_napadenega in range(self.roke):
-					if self.je_veljavna_poteza(roka_napadalca, roka_napadenega):
-						poteze.add((True, roka_napadalca, roka_napadenega))
-						poteze_arr.append((True, roka_napadalca, roka_napadenega))
+					poteze.add((True, roka_napadalca, roka_napadenega))
+					poteze_arr.append((True, roka_napadalca, roka_napadenega))
 		return poteze_arr
 						
 	def opravi_delitev(self):
