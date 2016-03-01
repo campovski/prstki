@@ -1,6 +1,6 @@
 # Prstki
 
-Projekt pri predmetu Programiranje 2.
+Projekt pri predmetu Programiranje 2, napisan v programskem jeziku Python 3.
 
 ## Pravila igre
 
