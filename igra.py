@@ -23,8 +23,8 @@ class Igra():
 	
 	def __init__(self, prsti, roke, master=None):
 		# Število rok in maksimalno število prstov na eni roki
-		self.roke = int(roke)
-		self.prsti = int(prsti)
+		self.roke = roke
+		self.prsti = prsti
 		
 		# self.position je tabela, ki hrani trenutno pozicijo.
 		# Inicializiramo jo s seznami enic, kjer seznam predstavlja
@@ -47,7 +47,7 @@ class Igra():
 		
 		# Pozicijo dodamo še v slovar
 		try:
-			self.position_count[(tuple(pozicija), self.na_potezi)] += 1
+			self.position_count[((tuple(pozicija[IGRALEC_1]), tuple(pozicija[IGRALEC_2])), self.na_potezi)] += 1
 		except:
 			self.position_count[((tuple(pozicija[IGRALEC_1]), tuple(pozicija[IGRALEC_2])), self.na_potezi)] = 1
 		
@@ -138,7 +138,6 @@ class Igra():
 		"""Preveri, ali smo se morda znašli tretjič v isti poziciji.
 		Preverimo, ali je bila pozicija že dvakrat zabeležena."""
 		
-		print(self.position_count)
 		try:
 			return self.position_count[((tuple(self.position[IGRALEC_1]), tuple(self.position[IGRALEC_2])), self.na_potezi)] == 2
 		except KeyError:
@@ -282,7 +281,7 @@ class Gui():
 				# Spremenimo število prstov na Radiobuttonu
 				self.seznam_radiobutton[IGRALEC_2][roka_igralca2].config(text=self.igra.position[IGRALEC_2][roka_igralca2])
 				
-				# Če je število prstov slučajno , to roko onemogočimo
+				# Če je število prstov slučajno 0, to roko onemogočimo
 				if self.igra.position[IGRALEC_2][roka_igralca2] == 0:
 					self.seznam_radiobutton[IGRALEC_2][roka_igralca2].config(state="disabled")
 			else:
