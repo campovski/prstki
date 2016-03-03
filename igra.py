@@ -48,7 +48,7 @@ class Igra():
 		# Pozicijo dodamo še v slovar
 		try:
 			self.position_count[((tuple(pozicija[IGRALEC_1]), tuple(pozicija[IGRALEC_2])), self.na_potezi)] += 1
-		except:
+		except KeyError:
 			self.position_count[((tuple(pozicija[IGRALEC_1]), tuple(pozicija[IGRALEC_2])), self.na_potezi)] = 1
 		
 	def razveljavi_potezo(self):
@@ -256,7 +256,7 @@ class Gui():
 		button_move = tk.Button(self.main, text="NAPAD!", command=self.naredi_potezo)
 		button_move.grid(row=0, column=2)
 		
-		self.label_na_potezi = tk.Label(self.main, text="Na potezi je Igralec {}".format(self.igra.na_potezi))
+		self.label_na_potezi = tk.Label(self.main, text="Na potezi je Igralec {}".format(self.igra.na_potezi+1))
 		self.label_na_potezi.grid(row=self.roke+1, columnspan=3)
 		
 		if self.igra.history != []:
@@ -297,13 +297,13 @@ class Gui():
 			
 			self.label_na_potezi.destroy()
 			if self.igra.je_konec():
-				self.label_na_potezi = tk.Label(self.main, text="KONEC IGRE!\nZmagal je igralec {}".format(nasprotnik(self.igra.na_potezi)))
+				self.label_na_potezi = tk.Label(self.main, text="KONEC IGRE!\nZmagal je igralec {}".format(nasprotnik(self.igra.na_potezi)+1))
 				self.label_na_potezi.grid(row=self.roke+1, columnspan=3)
 			elif self.igra.je_remi():
 				self.label_na_potezi = tk.Label(self.main, text="KONEC IGRE!\nTrikrat ponovljeno, na pol izgubljeno.")
 				self.label_na_potezi.grid(row=self.roke+1, columnspan=3)
 			else:
-				self.label_na_potezi = tk.Label(self.main, text="Na potezi je Igralec {}".format(self.igra.na_potezi))
+				self.label_na_potezi = tk.Label(self.main, text="Na potezi je Igralec {}".format(self.igra.na_potezi+1))
 				self.label_na_potezi.grid(row=self.roke+1, columnspan=3)
 			
 				# Preverimo veljavnost delitve. Če je na voljo, se pojavi gumb razdeli
