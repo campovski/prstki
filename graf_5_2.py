@@ -2,6 +2,8 @@
 ## Risanje grafa
 #
 # Program narisi_graf_5_2.py naredi datoteko graf_5_2.dot, ki predstavlja graf vseh možnih potez in pozicij v igri.
+# 
+# POZOR! Datoteka graf_5_2.dot se odpira približno 30 minut.
 #
 ###################################################################################################################
 
