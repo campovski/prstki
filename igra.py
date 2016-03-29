@@ -351,6 +351,54 @@ class Gui():
 		
 		tk.Label(self.main, text=pravila, justify='left').grid()
 
+##################################################################################################
+#
+# Razred Minimax 
+#
+# Računalnik računa svoje poteze.
+#
+##################################################################################################
+
+class Minimax:
+	def __init__(self, globina):
+		self.globina = globina
+		self.prekinitev = False
+		self.igra = None # dobimo kasneje
+		self.jaz = None # dobimo kasneje
+		self.poteza = None
+		
+	def prekini(self):
+		"""Metoda, ki jo pokliče GUI, če je treba nehati razmišljati, ker
+           je uporabnik zaprl okno ali izbral novo igro."""
+		self.prekinitev = True
+		
+	def izracunaj_potezo(self, igra):
+		"""Izračunaj potezo za trenutno stanje dane igre."""
+		self.igra = igra
+		self.prekinitev = False
+		self.jaz = self.igra.na_potezi
+		self.poteza = None # Sem napišemo potezo, ki jo najdemo
+		# Poženemo minimax
+		(poteza, vrednost) = self.minimax(self.globina, True)
+		self.jaz = None
+		self.igra = None
+		if not self.prekinitev:
+			logging.debug("minimax: poteza {0}, vrednost {1}".format(poteza, vrednost))
+			self.poteza = poteza
+			
+		# Vrednosti igra
+		ZMAGA = 100000
+		NESKONCNO = ZMAGA + 1
+		
+	def vrednost_pozicije(self):
+		razlika_v_prstih = 0
+		vrednost_poteze = {}
+		for roka, prsti in Igra.position[Igra.na_potezi - 1]:
+			Igra.opravi_potezo(prvi, drugi) # prvi, drugi!!
+			razlika_v_prstih = abs(prsti - (Igra.position[Igra.na_potezi])[roka])
+			Igra.razveljavi_potezo() # dvakrat, če je bila opravljena delitev??? kako je tukaj delitev???
+			vrednost_poteze[str(prvi) + " " + str(drugi)] = razlika_v_prstih
+		vrednost = 0
 
 if __name__ == "__main__":
 	root = tk.Tk()
@@ -360,12 +408,12 @@ if __name__ == "__main__":
 	
 	root.mainloop()
 	
-'''	
 ###################################################################################################
 #
 # PRIMER IGRE
 #
 ###################################################################################################
+'''
 
 if __name__ == "__main__":	
 	game = Igra(5,2)
@@ -408,6 +456,4 @@ if __name__ == "__main__":
 	print(game.position)
 	print(game.na_potezi)
 	print(game.veljavne_poteze())
-	print(game.je_konec())
-	'''
-	
+	print(game.je_konec()'''
