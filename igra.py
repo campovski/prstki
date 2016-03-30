@@ -99,15 +99,15 @@ class Igra():
 					poteze.add((False, roka_napadalca, roka_napadenega))
 					poteze_arr.append((False, roka_napadalca, roka_napadenega))
 				
-		# Če je možna delitev, dodamo še vse poteze z delitvijo. Seveda so to
-		# vse možne kombinacije, zato preverjanje, ali je poteza veljavna, ni
-		# potrebno, oziroma je celo napačno.
+		# Če je možna delitev, dodamo še vse poteze z delitvijo. Preverimo
+		# le, da napadena roka ni enaka 0 (roka napadalca ne more biti 0).
 		self.je_veljavna_delitev()
 		if self.moznost_delitve:
 			for roka_napadalca in range(self.roke):
 				for roka_napadenega in range(self.roke):
-					poteze.add((True, roka_napadalca, roka_napadenega))
-					poteze_arr.append((True, roka_napadalca, roka_napadenega))
+					if roka_napadenega != 0:
+						poteze.add((True, roka_napadalca, roka_napadenega))
+						poteze_arr.append((True, roka_napadalca, roka_napadenega))
 		return poteze_arr
 						
 	def opravi_delitev(self):
@@ -350,13 +350,154 @@ class Gui():
 		f.close()
 		
 		tk.Label(self.main, text=pravila, justify='left').grid()
+		
+#######################################################################################
+#
+# Razred NewGui
+#
+# Provides more enhanced GUI then class Gui
+#
+#######################################################################################
+		
+class NewGui():
+	def __init__(self, master):
+		self.master = master
+		menu = tk.Menu(self.master)
+		self.master.config(menu=menu)
+		
+		menu_igra = tk.Menu(menu)
+		menu.add_cascade(label="Igra", menu=menu_igra)
+		menu_igra.add_command(label="Nova igre", command=self.izbira_igre)
+		menu_igra.add_command(label="Pravila igre", command=self.pravila)
+		menu_igra.add_separator()
+		menu_igra.add_command(label="Izhod", command=self.master.destroy)
+		
+		self.izbira_igre()
+		
+	def izbira_igre(self):
+		"""Uporabniku damo možnost, da se odloči za število rok in prstov
+		ter način igre, torej npr. HUMAN vs HUMAN."""
+		
+		# Konstante za širino Entry-ja in Button-a
+		WDTH_BUTTON = 20
+		WDTH_ENTRY = 5
+		
+		self.new_frame()
+
+		label_hello = tk.Label(self.main, text="Hello human, please select who the players shall be!")
+		label_roke = tk.Label(self.main, text="ROKE: ")
+		self.entry_roke = tk.Entry(self.main, width=WDTH_ENTRY)
+		label_prsti = tk.Label(self.main, text="PRSTI: ")
+		self.entry_prsti = tk.Entry(self.main, width=WDTH_ENTRY)
+		button_HUvsHU = tk.Button(self.main, text="HUMAN vs HUMAN", width=WDTH_BUTTON, command=lambda: self.zacni_igro('clovek', 'clovek'))
+		button_HUvsAI = tk.Button(self.main, text="HUMAN vs COMPUTER", width=WDTH_BUTTON, command=lambda: self.zacni_igro('clovek', 'racunalnik'))
+		button_AIvsHU = tk.Button(self.main, text="COMPUTER vs HUMAN", width=WDTH_BUTTON, command=lambda: self.zacni_igro('racunalnik', 'clovek'))
+		button_AIvsAI = tk.Button(self.main, text="COMPUTER vs COMPUTER", width=WDTH_BUTTON, command=lambda: self.zacni_igro('racunalnik', 'racunalnik'))
+
+		label_hello.grid(row=0, columnspan=2)
+		label_roke.grid(row=1, column=0, sticky='e')
+		self.entry_roke.grid(row=1, column=1, sticky='w')
+		self.entry_roke.insert(0, "2")
+		label_prsti.grid(row=2, column=0, sticky='e')
+		self.entry_prsti.grid(row=2, column=1, sticky='w')
+		self.entry_prsti.insert(0, "5")
+		button_HUvsHU.grid(row=3, columnspan=2)
+		button_HUvsAI.grid(row=4, columnspan=2)
+		button_AIvsHU.grid(row=5, columnspan=2)
+		button_AIvsAI.grid(row=6, columnspan=2)
+		
+	def zacni_igro(self, igralec1, igralec2):
+		""" Metoda, ki začne igro, torej nastavi izbrane igralce in uvodni UI."""
+		
+		# Preberemo število rok in prstov
+		self.roke = int(self.entry_roke.get())
+		self.prsti = int(self.entry_prsti.get())
+		
+		# Nastavimo razrede igralcev, ki so bili izbrani
+		if igralec1 == 'clovek':
+			#self.igralec_1 = Clovek()
+			print("Prvi igralec je clovek")
+		else:
+			#self.igralec_1 = Racunalnik()
+			print("Prvi igralec je racunalnik.")
+		if igralec2 == 'clovek':
+			#self.igralec_2 = Clovek()
+			print("Drugi igralec je clovek")
+		else:
+			#self.igralec_2 = Racunalnik()
+			print("Drugi igralec je racunalnik.")
+			
+		# Začnemo igro
+		self.igra = Igra(self.prsti, self.roke)
+		
+		# Nastavimo UI za igro
+		self.setup_ui()
+		
+	def setup_ui(self):
+		"""Metoda (na novo) vzpostavi celotno igralno desko in jo nastavi na izbrano pozicijo."""
+		
+		self.new_frame()
+		
+		# Definiramo nekaj konstant
+		OVAL_SIZE = 60
+		DIFF_MID = 100
+		DIFF_KROGCI = 10
+		WDTH_CANVAS = 2 * self.prsti * (OVAL_SIZE + DIFF_KROGCI) + DIFF_MID
+		HGHT_CANVAS = self.roke * (OVAL_SIZE + DIFF_KROGCI)
+		
+		# Ustvarimo igralno desko
+		self.igralna_deska = tk.Canvas(self.main, width=WDTH_CANVAS, height=HGHT_CANVAS)
+		self.igralna_deska.grid()
+		
+		for roka in range(self.roke):			
+			x = DIFF_KROGCI
+			y = roka * (OVAL_SIZE + DIFF_KROGCI) + DIFF_KROGCI//2
+			self.seznam_krogci = [[[None for _ in range(self.prsti)] for _ in range(self.roke)], [[None for _ in range(self.prsti)] for _ in range(self.roke)]]
+			for prst in range(self.prsti):
+				self.seznam_krogci[IGRALEC_1][roka][prst] = self.igralna_deska.create_oval(x, y, x+OVAL_SIZE, y+OVAL_SIZE)
+				self.seznam_krogci[IGRALEC_2][roka][prst] = self.igralna_deska.create_oval(WDTH_CANVAS-x-OVAL_SIZE, y, WDTH_CANVAS-x, y+OVAL_SIZE)
+				
+				x += OVAL_SIZE + DIFF_KROGCI
+				
+	def new_frame(self):
+		try:
+			self.main.destroy()
+		except:
+			pass
+		finally:
+			self.main = tk.Frame(self.master)
+			self.main.grid()
+			
+	def pravila(self):
+		self.new_frame()
+		
+		f = open('README.md', 'r') 
+		pravila = f.read()
+		f.close()
+		
+		tk.Label(self.main, text=pravila, justify='left').grid()
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 
 
 if __name__ == "__main__":
 	root = tk.Tk()
 	root.title("Prstki Beta")
 	
-	app = Gui(root)
+	app = NewGui(root)
 	
 	root.mainloop()
 	
