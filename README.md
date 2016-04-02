@@ -13,6 +13,6 @@ Igra se prične tako, da oba igralca začneta s po enim prstom na vsaki roki. Ig
 
 Po napadu napadalcu ostane na vseh rokah enako število prstov, nasprotniku pa se na napadeni roki število prstov spremeni po formuli *P(B') = P(A) + P(B) % P*, kjer je *P(A)* število prstov na roki, s katero je igralec napadel, *P(B)* pa število prstov napadene roke pred napadom. Če je slučajno *P(B') = 0*, igralec to roko izgubi in z njo ne more več igrati, razen če kasneje opravi delitev.
 
-**Trikrat ponovljeno, na pol izgubljeno**: Če se igralec trikrat znajde v isti poziciji, je avtomatsko razglašen remi.
+**Prvič ponovljeno, na pol izgubljeno**: Če se igralec znajde v poziciji, v kateri je že bil, je avtomatsko razglašen remi.
 
 Cilj igre je nasprotniku uničiti vse roke. Zmaga prinese eno točko, remi pol in zguba nič.
