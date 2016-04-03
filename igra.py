@@ -746,20 +746,10 @@ class Minimax():
 				if roka == 0:
 					stevilo_prstov += 5
 				else: stevilo_prstov += roka
-		return stevilo_prstov
 		
-#	def naslednje_pozicije(self, pozicija):
-#		trenutna_pozicija = [pozicija[i][:] for i in range(2)]
-#		seznam = []
-#		for (delitev, roka_napadalca, roka_napadenega) in self.veljavne_poteze():
-#			if delitev:
-#				self.opravi_delitev()
-#			self.opravi_potezo(roka_napadalca, roka_napadenega)
-#			seznam.append([self.position[i][:] for i in range(2)])
-#			self.razveljavi_potezo()
-#			if delitev:
-#				self.razveljavi_potezo()
-#		return seznam
+		if self.igra.na_potezi != self.jaz:
+			return stevilo_prstov
+		else: return -stevilo_prstov
 		
 	def minimax(self, globina, maksimiziramo):
 		if self.prekinitev:
