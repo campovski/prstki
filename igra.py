@@ -15,6 +15,7 @@ import time
 IGRALEC_1 = 0
 IGRALEC_2 = 1
 
+# Definiramo konstante, ki določajo globino posameznega algoritma.
 MINIMAX_GLOBINA = 3
 MINIMAXpp_GLOBINA = 5
 ALPHABETA_GLOBINA = 7
@@ -29,7 +30,7 @@ class Igra():
 	"""Razred, ki skrbi za vsa pravila igre Prstki."""
 	
 	def __init__(self, prsti, roke, master=None):
-		# Število rok in maksimalno število prstov na eni roki
+		# Število rok in maksimalno število prstov na eni roki.
 		self.roke = roke
 		self.prsti = prsti
 		
@@ -38,15 +39,17 @@ class Igra():
 		# posameznega igralca.
 		self.position = [[1 for _ in range(self.roke)], [1 for _ in range(self.roke)]]
 		
-		# Igro seveda začne prvi igralec
+		# Igro seveda začne prvi igralec.
 		self.na_potezi = IGRALEC_1
 		
-		# Zgodovina nam bo služila za UNDO in pravilo o remiju
+		# Zgodovina nam bo služila za UNDO.
 		self.history = []
+		
+		# Štetje pozicij je koristno za pravilo o remiju.
 		self.position_count = {}
 	
 	def kopija(self):
-		""" Vrne kopijo igre za računalnik."""
+		""" Vrne kopijo igre za razred Racunalnik."""
 		
 		kopija_igra = Igra(self.prsti, self.roke)
 		kopija_igra.position = [self.position[i][:] for i in range(2)]
@@ -60,7 +63,7 @@ class Igra():
 		pozicija = [self.position[i][:] for i in range(2)]
 		self.history.append((pozicija, self.na_potezi))
 		
-		# Pozicijo dodamo še v slovar
+		# Pozicijo dodamo še v slovar za preverjanje remija.
 		try:
 			self.position_count[((tuple(pozicija[IGRALEC_1]), tuple(pozicija[IGRALEC_2])), self.na_potezi)] += 1
 		except KeyError:
@@ -69,9 +72,9 @@ class Igra():
 	def razveljavi_potezo(self):
 		"""Metoda, ki razveljavi zadnjo potezo."""
 		
-		if self.history != []:
-			(self.position, self.na_potezi) = self.history.pop()
-			self.position_count[((tuple(self.position[IGRALEC_1]), tuple(self.position[IGRALEC_2])), self.na_potezi)] -= 1
+		assert self.history != [], "Igra.razveljavi_potezo: self.history is empty."
+		(self.position, self.na_potezi) = self.history.pop()
+		self.position_count[((tuple(self.position[IGRALEC_1]), tuple(self.position[IGRALEC_2])), self.na_potezi)] -= 1
 		
 	def je_veljavna_poteza(self, roka_napadalca, roka_nasprotnika):
 		"""Preveri, ali morda igralec ne napada s prazno roko in ali
@@ -90,7 +93,7 @@ class Igra():
 				stevilo_prstov = roka
 		
 		# Preverimo, ali nam je preostala le ena roka in če je na
-		# preostali roki prstov za večkratnik rok	
+		# preostali roki prstov za večkratnik rok.	
 		if preostale_roke == 1 and stevilo_prstov % self.roke == 0:
 			self.moznost_delitve = True
 			self.prsti_po_delitvi = stevilo_prstov // self.roke
@@ -103,7 +106,7 @@ class Igra():
 		
 		poteze_arr = []
 		
-		# Dodamo poteze brez delitve
+		# Dodamo poteze brez delitve.
 		for roka_napadalca in range(self.roke):
 			for roka_napadenega in range(self.roke):
 				if self.je_veljavna_poteza(roka_napadalca, roka_napadenega):
@@ -120,17 +123,16 @@ class Igra():
 		return poteze_arr
 						
 	def opravi_delitev(self):
-		"""Metoda opravi delitev. Preverjanje, ali je delitev možna ali ne,
-		je potrebno narediti pred klicem same metode!"""
+		"""Metoda opravi delitev."""
 		
+		# Ugotovimo, ali lahko delitev opravimo.
 		self.je_veljavna_delitev()
 		
 		if self.moznost_delitve:	
-			# Shranimo pozicijo, če bi si slučajno premislili o delitvi
-			#self.shrani_pozicijo()
+			# Shranimo pozicijo, če bi si slučajno premislili o delitvi.
 			self.shrani_pozicijo()
 		
-			# Opravimo delitev
+			# Opravimo delitev.
 			self.position[self.na_potezi] = [self.prsti_po_delitvi for _ in range(self.roke)]
 		
 	def opravi_potezo(self, roka_napadalca, roka_napadenega):
@@ -140,11 +142,6 @@ class Igra():
 			self.shrani_pozicijo()
 			self.position[nasprotnik(self.na_potezi)][roka_napadenega] = (self.position[nasprotnik(self.na_potezi)][roka_napadenega] + self.position[self.na_potezi][roka_napadalca]) % self.prsti
 			self.na_potezi = nasprotnik(self.na_potezi)
-									
-	def zamenjaj_igralca_na_potezi(self):
-		"""Zamenja igralca, ki je na potezi."""
-		
-		self.na_potezi = nasprotnik(self.na_potezi)
 		
 	def je_remi(self):
 		"""Preveri, ali smo se morda znašli v isti poziciji.
@@ -166,269 +163,58 @@ class Igra():
 #
 # Razred Gui
 #
-# Skrbi za vse v zvezi z uporabniškim vmesnikom.
+# Skrbi za vse v zvezi z uporabniškim vmesnikom. To je klasični Gui.
 #
 ##################################################################################################
 
 class Gui():
 	def __init__(self, master):
 		self.master = master
+		
+		# Naredimo menu.
 		menu = tk.Menu(self.master)
 		self.master.config(menu=menu)
 		
+		# Naredimo child menu Igra.
 		menu_igra = tk.Menu(menu)
 		menu.add_cascade(label="Igra", menu=menu_igra)
-		menu_igra.add_command(label="Nova igre", command=self.izbira_igre)
+		menu_igra.add_command(label="Nova igra", command=self.izbira_igre)
 		menu_igra.add_command(label="Pravila igre", command=self.pravila)
 		menu_igra.add_separator()
 		menu_igra.add_command(label="Izhod", command=self.master.destroy)
 		
-		self.izbira_igre()
+		# Naredimo child menu Možnosti.
+		menu_options = tk.Menu(menu)
+		menu.add_cascade(label="Možnosti", menu=menu_options)
+		menu_options.add_command(label="Spremeni grafični vmesnik", command=lambda:select_gui(self.master, self))
+		menu_options.add_command(label="Help", command=self.help)
 		
-	def izbira_igre(self):
-		"""Uporabniku damo možnost, da se odloči za število rok in prstov
-		ter način igre, torej npr. HUMAN vs HUMAN."""
-		
-		# Konstante za širino Entry-ja in Button-a
-		WDTH_BUTTON = 20
-		WDTH_ENTRY = 5
-		
-		self.new_frame()
-		
-		self.scale_tezavnost = tk.Scale(self.main, from_=0, to=2)
-
-		label_tezavnost = tk.Label(self.main, text="Tezavnost:")
-		label_hello = tk.Label(self.main, text="Hello human, please select who the players shall be!")
-		label_roke = tk.Label(self.main, text="ROKE: ")
-		self.entry_roke = tk.Entry(self.main, width=WDTH_ENTRY)
-		label_prsti = tk.Label(self.main, text="PRSTI: ")
-		self.entry_prsti = tk.Entry(self.main, width=WDTH_ENTRY)
-		
-		button_HUvsHU = tk.Button(self.main, text="HUMAN vs HUMAN", width=WDTH_BUTTON, command=lambda: self.zacni_igro('clovek', 'clovek'))
-		button_HUvsAI = tk.Button(self.main, text="HUMAN vs COMPUTER", width=WDTH_BUTTON, command=lambda: self.zacni_igro('clovek', 'racunalnik'))
-		button_AIvsHU = tk.Button(self.main, text="COMPUTER vs HUMAN", width=WDTH_BUTTON, command=lambda: self.zacni_igro('racunalnik', 'clovek'))
-		button_AIvsAI = tk.Button(self.main, text="COMPUTER vs COMPUTER", width=WDTH_BUTTON, command=lambda: self.zacni_igro('racunalnik', 'racunalnik'))
-
-		label_hello.grid(row=0, columnspan=2)
-		label_roke.grid(row=1, column=0, sticky='e')
-		self.entry_roke.grid(row=1, column=1, sticky='w')
-		self.entry_roke.insert(0, "2")
-		label_prsti.grid(row=2, column=0, sticky='e')
-		self.entry_prsti.grid(row=2, column=1, sticky='w')
-		self.entry_prsti.insert(0, "5")
-		label_tezavnost.grid(row=3, column=0, sticky='e')
-		self.scale_tezavnost.grid(row=3, column=1, sticky='w')
-		button_HUvsHU.grid(row=4, columnspan=2)
-		button_HUvsAI.grid(row=5, columnspan=2)
-		button_AIvsHU.grid(row=6, columnspan=2)
-		button_AIvsAI.grid(row=7, columnspan=2)
-		
-	def zacni_igro(self, igralec1, igralec2):
-		""" Metoda, ki začne igro, torej nastavi izbrane igralce in uvodni UI."""
-		
-		# Preberemo število rok in prstov ter tezavnost
-		self.roke = int(self.entry_roke.get())
-		self.prsti = int(self.entry_prsti.get())
-		self.tezavnost = int(self.scale_tezavnost.get())
-		
-		# Nastavimo razrede igralcev, ki so bili izbrani
-		if igralec1 == 'clovek':
-			self.igralec_1 = Clovek(self)
-			print("Prvi igralec je clovek")
-		else:
-			if self.tezavnost == 1:
-				self.igralec_1 = Racunalnik(self, Minimax(globina=3))
-			elif self.tezavnost == 2:
-				self.igralec_1 = Racunalnik(self, Minimax(globina=4))
-			print("Prvi igralec je racunalnik.")
-		if igralec2 == 'clovek':
-			self.igralec_2 = Clovek(self)
-			print("Drugi igralec je clovek")
-		else:
-			if self.tezavnost == 1:
-				self.igralec_2 = Racunalnik(self, Minimax(globina=3))
-			elif self.tezavnost == 2:
-				self.igralec_2 = Racunalnik(self, Minimax(globina=4))
-			print("Drugi igralec je racunalnik.")
-			
-		# Začnemo igro
-		self.igra = Igra(self.prsti, self.roke)
-		
-		# Nastavimo UI za igro
-		self.setup_ui()
-		
-	def setup_ui(self):
-		"""Metoda (na novo) vzpostavi celotno igralno desko in jo nastavi na izbrano
-		pozicijo."""
-		
-		self.new_frame()
-		self.variable_igralca1 = tk.IntVar()
-		self.variable_igralca1.set(None)
-		self.variable_igralca2 = tk.IntVar()
-		self.variable_igralca2.set(None)
-		
-		self.seznam_radiobutton = [[None for _ in range(self.roke)],[None for _ in range(self.roke)]]
-		for i in range(self.roke):
-			self.seznam_radiobutton[IGRALEC_1][i] = tk.Radiobutton(self.main, text=self.igra.position[IGRALEC_1][i], variable=self.variable_igralca1, value=i)
-			self.seznam_radiobutton[IGRALEC_2][i] = tk.Radiobutton(self.main, text=self.igra.position[IGRALEC_2][i], variable=self.variable_igralca2, value=i)
-			if self.igra.position[IGRALEC_1][i] == 0:
-				self.seznam_radiobutton[IGRALEC_1][i].config(state="disabled")
-			if self.igra.position[IGRALEC_2][i] == 0:
-				self.seznam_radiobutton[IGRALEC_2][i].config(state="disabled")
-			self.seznam_radiobutton[IGRALEC_1][i].grid(row=i+1, column=0)
-			self.seznam_radiobutton[IGRALEC_2][i].grid(row=i+1, column=2)
-			
-		button_move = tk.Button(self.main, text="NAPAD!", command=self.preberi_potezo)
-		button_move.grid(row=0, column=2)
-		
-		self.label_na_potezi = tk.Label(self.main, text="Na potezi je Igralec {}".format(self.igra.na_potezi+1))
-		self.label_na_potezi.grid(row=self.roke+1, columnspan=3)
-		
-		if self.igra.history != []:
-					self.button_razveljavi = tk.Button(self.main, text="Undo", command=self.razveljavi)
-					self.button_razveljavi.grid(row=0, column=0)
-					
-	def preberi_potezo(self):
-		"""Preberemo in ponastavimo vrednosti spremenljivk"""
-		roka_igralca1 = self.variable_igralca1.get()
-		roka_igralca2 = self.variable_igralca2.get()
-		self.variable_igralca1.set(None)
-		self.variable_igralca2.set(None)
-		
-		self.naredi_potezo(roka_igralca1, roka_igralca2)
-		
-	def naredi_potezo(self, roka_igralca1, roka_igralca2):
-		"""Metoda, ki opravi potezo. Pri tem mora preveriti veljavnost poteze, spremeniti self.igra.position"""
-		
-		# Preverimo, ali je igralec izbral obe roki
-		if roka_igralca1 != None and roka_igralca2 != None:
-			if self.igra.na_potezi == IGRALEC_1:
-				# Opravimo potezo
-				self.igra.opravi_potezo(roka_igralca1, roka_igralca2)
-				
-				# Spremenimo število prstov na Radiobuttonu
-				self.seznam_radiobutton[IGRALEC_2][roka_igralca2].config(text=self.igra.position[IGRALEC_2][roka_igralca2])
-				
-				# Če je število prstov slučajno 0, to roko onemogočimo
-				if self.igra.position[IGRALEC_2][roka_igralca2] == 0:
-					self.seznam_radiobutton[IGRALEC_2][roka_igralca2].config(state="disabled")
-			else:
-				# Opravimo potezo
-				self.igra.opravi_potezo(roka_igralca2, roka_igralca1)
-				
-				# Spremenimo število prstov na Radiobuttonu
-				self.seznam_radiobutton[IGRALEC_1][roka_igralca1].config(text=self.igra.position[IGRALEC_1][roka_igralca1])
-				
-				# Če je število prstov slučajno , to roko onemogočimo
-				if self.igra.position[IGRALEC_1][roka_igralca1] == 0:
-					self.seznam_radiobutton[IGRALEC_1][roka_igralca1].config(state="disabled")
-			
-			self.label_na_potezi.destroy()
-			if self.igra.je_konec():
-				self.label_na_potezi = tk.Label(self.main, text="KONEC IGRE!\nZmagal je igralec {}".format(nasprotnik(self.igra.na_potezi)+1))
-				self.label_na_potezi.grid(row=self.roke+1, columnspan=3)
-			elif self.igra.je_remi():
-				self.label_na_potezi = tk.Label(self.main, text="KONEC IGRE!\nPrvič ponovljeno, na pol izgubljeno.")
-				self.label_na_potezi.grid(row=self.roke+1, columnspan=3)
-			else:
-				self.label_na_potezi = tk.Label(self.main, text="Na potezi je Igralec {}".format(self.igra.na_potezi+1))
-				self.label_na_potezi.grid(row=self.roke+1, columnspan=3)
-			
-				# Preverimo veljavnost delitve. Če je na voljo, se pojavi gumb razdeli
-				self.igra.je_veljavna_delitev()
-				if self.igra.moznost_delitve:
-					button_delitev = tk.Button(self.main, text="Razdeli", command=self.naredi_delitev)
-					button_delitev.grid(row=0, column=1)
-				
-				if self.igra.history != []:
-					self.button_razveljavi = tk.Button(self.main, text="Undo", command=self.razveljavi)
-					self.button_razveljavi.grid(row=0, column=0)
-					
-	def preracunaj_potezo(self, p):
-		pass
-			
-			
-	def naredi_delitev(self):
-		"""Metoda, ki opravi delitev."""
-		
-		self.igra.opravi_delitev()
-		self.setup_ui()
-			
-		
-	def razveljavi(self):
-		"""Metoda, ki razveljavi potezo."""
-		
-		self.igra.razveljavi_potezo()
-		self.setup_ui()
-		
-		
-	def new_frame(self):
-		try:
-			self.main.destroy()
-		except:
-			pass
-		finally:
-			self.main = tk.Frame(self.master)
-			self.main.grid()
-		
-		
-	def pravila(self):
-		self.new_frame()
-		
-		f = open('README.md', 'r') 
-		pravila = f.read()
-		f.close()
-		
-		tk.Label(self.main, text=pravila, justify='left').grid()
-		
-#######################################################################################
-#
-# Razred NewGui
-#
-# Provides more enhanced GUI then class Gui
-#
-#######################################################################################
-		
-class NewGui():
-
-	# Definiramo konstante
-	OVAL_SIZE = 60
-	DIFF_MID = 100
-	DIFF_KROGCI = 10
-	
-	def __init__(self, master):
-		self.master = master
-		menu = tk.Menu(self.master)
-		self.master.config(menu=menu)
-		
-		menu_igra = tk.Menu(menu)
-		menu.add_cascade(label="Igra", menu=menu_igra)
-		menu_igra.add_command(label="Nova igre", command=self.izbira_igre)
-		menu_igra.add_command(label="Pravila igre", command=self.pravila)
-		menu_igra.add_separator()
-		menu_igra.add_command(label="Izhod", command=self.master.destroy)
-		
+		# Nastavimo igralca na človek, da lahko v izbira_igre lažje
+		# kličemo prekini_igralce.
 		self.igralec_1 = Clovek(self)
 		self.igralec_2 = Clovek(self)
+		
 		self.izbira_igre()
 		
 	def izbira_igre(self):
 		"""Uporabniku damo možnost, da se odloči za število rok in prstov
-		ter način igre, torej npr. HUMAN vs HUMAN."""
+		ter izbor igralcev."""
 		
 		self.prekini_igralce()
 		
-		# Konstante za širino Entry-ja in Button-a
+		# Konstante za širino Entry-ja in Button-a.
 		WDTH_BUTTON = 20
 		WDTH_ENTRY = 5
 		
 		self.new_frame()
 		
+		# Spremenljivke za OptionMenu.
 		self.option1 = tk.StringVar(self.main)
 		self.option2 = tk.StringVar(self.main)
 		self.option1.set("Človek")
-		self.option2.set("Človek")
+		self.option2.set("Minimax")
 
+		# Ustvarimo labele, entryje, gumbe...
 		label_hello = tk.Label(self.main, text="Hello human, please select who the players shall be!")
 		label_roke = tk.Label(self.main, text="ROKE: ")
 		self.entry_roke = tk.Entry(self.main, width=WDTH_ENTRY)
@@ -440,6 +226,7 @@ class NewGui():
 		label_igralec2 = tk.Label(self.main, text="Igralec 2")
 		button_zacni = tk.Button(self.main, text="Začni igro!", command=self.preberi_igralce)
 
+		# Gridamo labele, entryje, gumbe...
 		label_hello.grid(row=0, columnspan=2)
 		label_roke.grid(row=1, column=0, sticky='e')
 		self.entry_roke.grid(row=1, column=1, sticky='w')
@@ -454,8 +241,309 @@ class NewGui():
 		button_zacni.grid(row=5, columnspan=2)
 		
 	def preberi_igralce(self):
+		"""Metoda, ki prebere izbrane igralce in začne igro."""
+		
+		# Dobimo izbiri.
 		option1 = self.option1.get()
 		option2 = self.option2.get()
+		
+		if option1 == "Človek":
+			if option2 == "Človek":
+				self.zacni_igro(Clovek(self), Clovek(self))
+			elif option2 == "Minimax":
+				self.zacni_igro(Clovek(self), Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)))
+			elif option2 == "Minimax++":
+				self.zacni_igro(Clovek(self), Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)))
+			elif option2 == "Alpha-Beta":
+				self.zacni_igro(Clovek(self), Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)))
+		elif option1 == "Minimax":
+			if option2 == "Človek":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)), Clovek(self))
+			elif option2 == "Minimax":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)))
+			elif option2 == "Minimax++":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)))
+			elif option2 == "Alpha-Beta":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)), Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)))
+		elif option1 == "Minimax++":
+			if option2 == "Človek":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)), Clovek(self))
+			elif option2 == "Minimax":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)))
+			elif option2 == "Minimax++":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)))
+			elif option2 == "Alpha-Beta":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)), Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)))
+		elif option1 == "Alpha-Beta":
+			if option2 == "Človek":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)), Clovek(self))
+			elif option2 == "Minimax":
+				self.zacni_igro(Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)))
+			elif option2 == "Minimax++":
+				self.zacni_igro(Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)))
+			elif option2 == "Alpha-Beta":
+				self.zacni_igro(Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)), Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)))	
+				
+	def zacni_igro(self, igralec1, igralec2):
+		""" Metoda, ki začne igro, torej nastavi izbrane razrede igralcev in uvodni UI."""
+		
+		# Preberemo število rok in prstov. Če število rok ni int,
+		# ali ne ustreza določenim zahtevam, vrnemo None.
+		try:
+			self.roke = int(self.entry_roke.get())
+			if self.roke <= 0:
+				return
+		except: 
+			return
+		try:
+			self.prsti = int(self.entry_prsti.get())
+			if self.prsti <= 1:
+				return
+		except: 
+			return
+		
+		# Ustvarimo objekte igralcev.
+		self.igralec_1 = igralec1
+		self.igralec_2 = igralec2
+			
+		# Začnemo igro.
+		self.igra = Igra(self.prsti, self.roke)
+		
+		# Nastavimo UI za igro.
+		self.setup_ui()
+		
+	def setup_ui(self):
+		"""Metoda (na novo) vzpostavi celotno igralno desko in jo nastavi na izbrano
+		pozicijo."""
+		
+		self.new_frame()
+		
+		# Ustvarimo spremenljivke za RadioButton-e.
+		self.variable_igralca1 = tk.IntVar()
+		self.variable_igralca1.set(None)
+		self.variable_igralca2 = tk.IntVar()
+		self.variable_igralca2.set(None)
+		
+		# Ustvarimo seznam RadioButtonov in ga nastavimo na trenutno pozicijo.
+		self.seznam_radiobutton = [[None for _ in range(self.roke)],[None for _ in range(self.roke)]]
+		for i in range(self.roke):
+			self.seznam_radiobutton[IGRALEC_1][i] = tk.Radiobutton(self.main, text=self.igra.position[IGRALEC_1][i], variable=self.variable_igralca1, value=i)
+			self.seznam_radiobutton[IGRALEC_2][i] = tk.Radiobutton(self.main, text=self.igra.position[IGRALEC_2][i], variable=self.variable_igralca2, value=i)
+			
+			# Če je število prstov na roki 0, onemogočimo gumb, ki predstavlja to roko.
+			if self.igra.position[IGRALEC_1][i] == 0:
+				self.seznam_radiobutton[IGRALEC_1][i].config(state="disabled")
+			if self.igra.position[IGRALEC_2][i] == 0:
+				self.seznam_radiobutton[IGRALEC_2][i].config(state="disabled")
+				
+			self.seznam_radiobutton[IGRALEC_1][i].grid(row=i+1, column=0)
+			self.seznam_radiobutton[IGRALEC_2][i].grid(row=i+1, column=2)
+		
+		# Če je na potezi človek, potrebuje gumb za napad.
+		if (self.igra.na_potezi == IGRALEC_1 and isinstance(self.igralec_1, Clovek))\
+			or (self.igra.na_potezi == IGRALEC_2 and isinstance(self.igralec_2, Clovek)):
+			button_move = tk.Button(self.main, text="NAPAD!", command=self.preberi_potezo)
+			button_move.grid(row=0, column=2)
+		
+		try:
+			self.label_na_potezi.destroy()
+		except: pass
+		
+		# Preverimo, ali je konec igre, remi.
+		if self.igra.je_konec():
+			self.label_na_potezi = tk.Label(self.main, text="KONEC IGRE!\nZmagal je igralec {}".format(nasprotnik(self.igra.na_potezi)+1))
+			self.label_na_potezi.grid(row=self.roke+1, columnspan=3)
+		elif self.igra.je_remi():
+			self.label_na_potezi = tk.Label(self.main, text="KONEC IGRE!\nPrvič ponovljeno, na pol izgubljeno.")
+			self.label_na_potezi.grid(row=self.roke+1, columnspan=3)
+		else:
+			self.label_na_potezi = tk.Label(self.main, text="Na potezi je Igralec {}".format(self.igra.na_potezi+1))
+			self.label_na_potezi.grid(row=self.roke+1, columnspan=3)
+		
+			# Preverimo veljavnost delitve. Če je na voljo, se pojavi gumb razdeli.
+			self.igra.je_veljavna_delitev()
+			if self.igra.moznost_delitve:
+				button_delitev = tk.Button(self.main, text="Razdeli", command=self.naredi_delitev)
+				button_delitev.grid(row=0, column=1)
+			
+			# Če imamo kaj zgodovine, lahko ponudimo možnost razveljavitve poteze.
+			if self.igra.history != []:
+				self.button_razveljavi = tk.Button(self.main, text="Undo", command=self.razveljavi)
+				self.button_razveljavi.grid(row=0, column=0)
+				
+			# Prisilimo igralca, da igra. Potrebno le za računalnik
+			# (metoda igraj pri cloveku passa).
+			if self.igra.na_potezi == IGRALEC_1:
+				self.igralec_1.igraj()
+			elif self.igra.na_potezi == IGRALEC_2:
+				self.igralec_2.igraj()
+					
+	def preberi_potezo(self):
+		"""Preberemo in ponastavimo vrednosti spremenljivk ter naredimo potezo."""
+		
+		roka_igralca1 = self.variable_igralca1.get()
+		roka_igralca2 = self.variable_igralca2.get()
+		self.variable_igralca1.set(None)
+		self.variable_igralca2.set(None)
+		
+		self.naredi_potezo(roka_igralca1, roka_igralca2)
+		
+	def naredi_potezo(self, roka_igralca1, roka_igralca2):
+		"""Metoda, ki opravi potezo. Pri tem mora preveriti veljavnost poteze, spremeniti self.igra.position."""
+		
+		# Preverimo, ali je igralec izbral obe roki.
+		if roka_igralca1 != None and roka_igralca2 != None:
+			if self.igra.na_potezi == IGRALEC_1:
+				# Opravimo potezo
+				self.igra.opravi_potezo(roka_igralca1, roka_igralca2)
+				self.setup_ui()
+			else:
+				# Opravimo potezo
+				self.igra.opravi_potezo(roka_igralca2, roka_igralca1)
+				self.setup_ui()
+			
+	def naredi_delitev(self):
+		"""Metoda, ki opravi delitev."""
+		
+		self.igra.opravi_delitev()
+		self.setup_ui()
+			
+	def razveljavi(self):
+		"""Metoda, ki razveljavi potezo."""
+		
+		self.igra.razveljavi_potezo()
+		self.setup_ui()
+		
+	def prekini_igralce(self):
+		"""Metoda, ki prekine igralce. Potrebno le za računalnik (pri človeku passa)."""
+		
+		if self.igralec_1: self.igralec_1.prekini()
+		if self.igralec_2: self.igralec_2.prekini()
+		
+	def new_frame(self):
+		"""Metoda, ki ustvari nov Frame in pred tem pobriše starega, če obstaja."""
+		
+		try:
+			self.main.destroy()
+		except:
+			pass
+		finally:
+			self.main = tk.Frame(self.master)
+			self.main.grid()
+		
+	def pravila(self):
+		"""Metoda, ki napiše pravila igre."""
+		
+		self.new_frame()
+		
+		f = open('README.md', 'r') 
+		pravila = f.read()
+		f.close()
+		
+		tk.Label(self.main, text=pravila, justify='left').grid()
+		
+	def help(self):
+		"""Metoda, ki napiše nekaj namigov."""
+		
+		self.new_frame()
+		
+		help = "Ko je možna delitev, se pojavi gumb, na katerega klikni, če želi opraviti delitev.\nZa razveljavitev poteze je prav tako na voljo gumb.\n\nNasvet: Za boljšo preglednost priporočamo uporabo klasičnega uporabniškega vmesnika za število prstov, ki presega 10."
+		tk.Label(self.main, text=help, justify='left').grid()
+		
+#######################################################################################
+#
+# Razred NewGui
+#
+# Provides more enhanced GUI then class Gui
+#
+#######################################################################################
+		
+class NewGui():
+
+	# Definiramo konstante.
+	OVAL_SIZE = 60
+	DIFF_MID = 100
+	DIFF_KROGCI = 10
+	
+	def __init__(self, master):
+		self.master = master
+		
+		# Naredimo menu.
+		menu = tk.Menu(self.master)
+		self.master.config(menu=menu)
+		
+		# Naredimo child menu Igra.
+		menu_igra = tk.Menu(menu)
+		menu.add_cascade(label="Igra", menu=menu_igra)
+		menu_igra.add_command(label="Nova igra", command=self.izbira_igre)
+		menu_igra.add_command(label="Pravila igre", command=self.pravila)
+		menu_igra.add_separator()
+		menu_igra.add_command(label="Izhod", command=self.master.destroy)
+		
+		# Naredimo child menu Možnosti.
+		menu_options = tk.Menu(menu)
+		menu.add_cascade(label="Možnosti", menu=menu_options)
+		menu_options.add_command(label="Spremeni grafični vmesnik", command=lambda:select_gui(self.master, self))
+		menu_options.add_command(label="Help", command=self.help)
+		
+		# Nastavimo igralca na človek, da lahko v izbira_igre lažje
+		# kličemo prekini_igralce.
+		self.igralec_1 = Clovek(self)
+		self.igralec_2 = Clovek(self)
+		
+		self.izbira_igre()
+		
+	def izbira_igre(self):
+		"""Uporabniku damo možnost, da se odloči za število rok in prstov
+		ter izbor igralcev."""
+		
+		self.prekini_igralce()
+		
+		# Konstante za širino Entry-ja in Button-a.
+		WDTH_BUTTON = 20
+		WDTH_ENTRY = 5
+		
+		self.new_frame()
+		
+		# Spremenljivke za OptionMenu.
+		self.option1 = tk.StringVar(self.main)
+		self.option2 = tk.StringVar(self.main)
+		self.option1.set("Človek")
+		self.option2.set("Človek")
+
+		# Ustvarimo labele, entryje, gumbe...
+		label_hello = tk.Label(self.main, text="Hello human, please select who the players shall be!")
+		label_roke = tk.Label(self.main, text="ROKE: ")
+		self.entry_roke = tk.Entry(self.main, width=WDTH_ENTRY)
+		label_prsti = tk.Label(self.main, text="PRSTI: ")
+		self.entry_prsti = tk.Entry(self.main, width=WDTH_ENTRY)
+		self.optionmenu_igralec1 = tk.OptionMenu(self.main, self.option1, "Človek", "Minimax", "Minimax++", "Alpha-Beta")
+		self.optionmenu_igralec2 = tk.OptionMenu(self.main, self.option2, "Človek", "Minimax", "Minimax++", "Alpha-Beta")
+		label_igralec1 = tk.Label(self.main, text="Igralec 1")
+		label_igralec2 = tk.Label(self.main, text="Igralec 2")
+		button_zacni = tk.Button(self.main, text="Začni igro!", command=self.preberi_igralce)
+
+		# Gridamo labele, entryje, gumbe...
+		label_hello.grid(row=0, columnspan=2)
+		label_roke.grid(row=1, column=0, sticky='e')
+		self.entry_roke.grid(row=1, column=1, sticky='w')
+		self.entry_roke.insert(0, "2")
+		label_prsti.grid(row=2, column=0, sticky='e')
+		self.entry_prsti.grid(row=2, column=1, sticky='w')
+		self.entry_prsti.insert(0, "5")
+		label_igralec1.grid(row=3, column=0, sticky='e')
+		label_igralec2.grid(row=3, column=1, sticky='w')
+		self.optionmenu_igralec1.grid(row=4, column=0, sticky='e')
+		self.optionmenu_igralec2.grid(row=4, column=1, sticky='w')
+		button_zacni.grid(row=5, columnspan=2)
+		
+	def preberi_igralce(self):
+		"""Metoda, ki prebere izbrane igralce in začne igro."""
+		
+		# Dobimo izbiri.
+		option1 = self.option1.get()
+		option2 = self.option2.get()
+		
 		if option1 == "Človek":
 			if option2 == "Človek":
 				self.zacni_igro(Clovek(self), Clovek(self))
@@ -496,20 +584,28 @@ class NewGui():
 	def zacni_igro(self, igralec1, igralec2):
 		""" Metoda, ki začne igro, torej nastavi izbrane igralce in uvodni UI."""
 		
-		self.prekini_igralce()
+		# Preberemo število rok in prstov. Če število rok ni int,
+		# ali ne ustreza določenim zahtevam, vrnemo None.
+		try:
+			self.roke = int(self.entry_roke.get())
+			if self.roke <= 0:
+				return
+		except: 
+			return
+		try:
+			self.prsti = int(self.entry_prsti.get())
+			if self.prsti <= 1:
+				return
+		except: 
+			return
 		
-		# Preberemo število rok in prstov
-		self.roke = int(self.entry_roke.get())
-		self.prsti = int(self.entry_prsti.get())
-		
+		# Ustvarimo objekte igralcev.
 		self.igralec_1 = igralec1
 		self.igralec_2 = igralec2
 			
 		# Začnemo igro
 		self.igra = Igra(self.prsti, self.roke)
 		
-		if isinstance(self.igralec_1, Racunalnik):
-			self.naredi_potezo(0,0)
 		# Nastavimo UI za igro
 		self.setup_ui()
 		
@@ -517,25 +613,29 @@ class NewGui():
 		"""Metoda (na novo) vzpostavi celotno igralno desko in jo nastavi na izbrano pozicijo."""
 		
 		self.new_frame()
-		print(self.igra.veljavne_poteze())
-		print(self.igra.position)
 		
+		# S tem bomo preverjali, ali lahko že opravimo potezo.
 		self.potrebno_opraviti = [None, None]
 		
+		# Nastavimo dimenzije Canvasa.
 		self.WDTH_CANVAS = 2 * self.prsti * (NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI) + NewGui.DIFF_MID
 		self.HGHT_CANVAS = self.roke * (NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI)
 		
-		# Ustvarimo igralno desko
+		# Ustvarimo igralno desko.
 		self.igralna_deska = tk.Canvas(self.main, width=self.WDTH_CANVAS, height=self.HGHT_CANVAS)
 		self.igralna_deska.grid()
+		
+		# Bindamo tipkovnico na igralna_deska.
 		self.igralna_deska.focus_set()
 		
+		# Če je na potezi človek, bindamo gumbe, sicer ne.
 		if (self.igra.na_potezi == IGRALEC_1 and isinstance(self.igralec_1, Clovek))\
 			or (self.igra.na_potezi == IGRALEC_2 and isinstance(self.igralec_2, Clovek)):
 			self.igralna_deska.bind("<Button-1>", self.deska_klik)
 			self.igralna_deska.bind("<Button-3>", self.naredi_delitev)
 			self.igralna_deska.bind("<BackSpace>", self.razveljavi)
 		
+		# Za vsak prst na vsaki roki naredimo krogec.
 		for roka in range(self.roke):			
 			x = NewGui.DIFF_KROGCI
 			y = roka * (NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI) + NewGui.DIFF_KROGCI//2
@@ -545,11 +645,14 @@ class NewGui():
 				self.seznam_krogci[IGRALEC_1][roka][prst] = self.igralna_deska.create_oval(x, y, x+NewGui.OVAL_SIZE, y+NewGui.OVAL_SIZE, outline='red')
 				self.seznam_krogci[IGRALEC_2][roka][prst] = self.igralna_deska.create_oval(self.WDTH_CANVAS-x-NewGui.OVAL_SIZE, y, self.WDTH_CANVAS-x, y+NewGui.OVAL_SIZE, outline='green')
 				
+				# Če je kakšna roka prazna, obarvamo rob krogcev sivo črtkano.
 				if self.igra.position[IGRALEC_1][roka] == 0 or self.igra.position[IGRALEC_2][roka] == 0:
 					if self.igra.position[IGRALEC_1][roka] == 0:
 						self.igralna_deska.itemconfig(self.seznam_krogci[IGRALEC_1][roka][prst], outline='grey', dash=(5,))
 					if self.igra.position[IGRALEC_2][roka] == 0:
 						self.igralna_deska.itemconfig(self.seznam_krogci[IGRALEC_2][roka][prst], outline='grey', dash=(5,))
+						
+				# Za žive prste napolnimo krogce z barvo.
 				if prst < self.igra.position[IGRALEC_1][roka] or prst < self.igra.position[IGRALEC_2][roka]:
 					if prst < self.igra.position[IGRALEC_1][roka]:
 						self.igralna_deska.itemconfig(self.seznam_krogci[IGRALEC_1][roka][prst], fill='red')
@@ -561,6 +664,8 @@ class NewGui():
 		try:
 			self.napis.destroy()
 		except: pass
+		
+		# Preverimo, ali je konec igre, remi.
 		if self.igra.je_konec():
 			self.napis = tk.Label(self.main, text="KONEC IGRE!\nZmagal je igralec {}".format(nasprotnik(self.igra.na_potezi)+1))
 			self.igralna_deska.unbind("<Button-1>")
@@ -582,18 +687,29 @@ class NewGui():
 		self.napis.grid()
 		
 	def prekini_igralce(self):
+		"""Metoda, ki prekine igralce. Potrebno le za računalnik (pri človeku passa)."""
+		
 		if self.igralec_1: self.igralec_1.prekini()
 		if self.igralec_2: self.igralec_2.prekini()
 		
 				
 	def deska_klik(self, event):
+		"""Metoda posrednik med klikom in preraunavanjem poteze. Skrbi le za shranitev koordinat,
+		da lahko ob kliku kličemo funkcijo brez 'lambda:...'."""
+		
 		x = event.x
 		y = event.y
 		self.preracunaj_potezo((x,y))
 				
 	def preracunaj_potezo(self, p):
+		"""Metoda, ki na podlagi koordinat klika določi, katero roko smo izbrali.
+		Če smo izbrali že svojo in nasprotnikovo roko, opravi potezo. Tu je v pomoč
+		seznam potrebno_opraviti."""
+		
 		(x,y) = p
 		igralec = None
+		
+		# Po x koordinati določimo, ali gre za roko igralca 1 ali igralca 2.
 		if x < (NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI) * self.prsti:
 			igralec = IGRALEC_1
 		elif x > self.WDTH_CANVAS - (NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI) * self.prsti:
@@ -602,11 +718,15 @@ class NewGui():
 		if igralec != None:
 			roka = (int(y) - NewGui.DIFF_KROGCI//2)//(NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI)
 			self.potrebno_opraviti[igralec] = roka
+			
+			# Če sta izbrani obe roki, opravimo potezo.
 			if self.potrebno_opraviti[IGRALEC_1] != None and self.potrebno_opraviti[IGRALEC_2] != None:
 				if self.igra.position[IGRALEC_1][self.potrebno_opraviti[IGRALEC_1]] != 0 and self.igra.position[IGRALEC_1][self.potrebno_opraviti[IGRALEC_1]] != 0:
 					self.naredi_potezo(self.potrebno_opraviti[IGRALEC_1], self.potrebno_opraviti[IGRALEC_2])
 				
 	def naredi_potezo(self, roka_igralca1, roka_igralca2):
+		"""Metoda, ki naredi potezo."""
+		
 		if self.igra.na_potezi == IGRALEC_1:
 			self.igra.opravi_potezo(roka_igralca1, roka_igralca2)
 		elif self.igra.na_potezi == IGRALEC_2:
@@ -614,26 +734,32 @@ class NewGui():
 		self.setup_ui()
 			
 	def naredi_delitev(self, event=None):
+		"""Metoda, ki naredi delitev."""
+		
 		self.igra.je_veljavna_delitev()
 		if self.igra.moznost_delitve:
 			self.igra.opravi_delitev()
 			self.setup_ui()
 			
 	def razveljavi(self, event):
-	
-		if self.igra.na_potezi == IGRALEC_1 and isinstance(self.igralec_1, Clovek):
-			if isinstance(self.igralec_2, Racunalnik) and self.igra.history[len(self.igra.history)-1][1] != IGRALEC_1:
+		"""Metoda, ki razveljavi potezo. Seveda lahko to stori le človek, zato preverimo,
+		ali je na potezi človek."""
+		
+		if self.igra.history != []:
+			if self.igra.na_potezi == IGRALEC_1 and isinstance(self.igralec_1, Clovek):
+				if isinstance(self.igralec_2, Racunalnik) and self.igra.history[len(self.igra.history)-1][1] != IGRALEC_1:
+					self.igra.razveljavi_potezo()
 				self.igra.razveljavi_potezo()
-			self.igra.razveljavi_potezo()
-			self.setup_ui()
-		elif self.igra.na_potezi == IGRALEC_2 and isinstance(self.igralec_2, Clovek):
-			if isinstance(self.igralec_1, Racunalnik) and self.igra.history[len(self.igra.history)-1][1] != IGRALEC_2:
+				self.setup_ui()
+			elif self.igra.na_potezi == IGRALEC_2 and isinstance(self.igralec_2, Clovek):
+				if isinstance(self.igralec_1, Racunalnik) and self.igra.history[len(self.igra.history)-1][1] != IGRALEC_2:
+					self.igra.razveljavi_potezo()
 				self.igra.razveljavi_potezo()
-			self.igra.razveljavi_potezo()
-			self.setup_ui()
-			
+				self.setup_ui()		
 				
 	def new_frame(self):
+		"""Metoda, ki ustvari nov Frame in pred tem pobriše starega, če obstaja."""
+		
 		try:
 			self.main.destroy()
 		except:
@@ -643,6 +769,8 @@ class NewGui():
 			self.main.grid()
 			
 	def pravila(self):
+		"""Metoda, ki napiše pravila igre."""
+		
 		self.new_frame()
 		
 		f = open('README.md', 'r') 
@@ -650,6 +778,13 @@ class NewGui():
 		f.close()
 		
 		tk.Label(self.main, text=pravila, justify='left').grid()
+		
+	def help(self):
+		"""Metoda, ki napiše nekaj namigov."""
+		
+		help = "Za delitev pritisni desni miškin gumb.\nZa razveljavitev poteze pritisni povratnico.\n\nNasvet: Za boljšo preglednost priporočamo uporabo klasičnega uporabniškega vmesnika za število prstov, ki presega 10."
+		tk.Label(self.main, text=help, justify='left').grid()
+		tk.Button(self.main, text="Nova igra", command=self.izbira_igre).grid()
 		
 ##################################################################################################
 #
@@ -662,12 +797,15 @@ class Clovek():
 		self.gui = gui
 	
 	def igraj(self):
+		# Človeka ne rabimo siliti k opravljanju potez.
 		pass
 		
 	def prekini(self):
+		# Človeka ne rabimo prekiniti; on se sam prekine.
 		pass
 	
 	def klik(self, p):
+		# Ob kliku preračunamo potezo.
 		self.gui.preracunaj_potezo()
 
 
@@ -675,23 +813,29 @@ class Clovek():
 #	
 # Razred Racunalnik
 #
-#
+# Razred, ki skrbi za vse v zvezi z računalnikom in komunikacijo z izbranim algoritmom.
 ##################################################################################################	
 		
 class Racunalnik():
 	def __init__(self, gui, algoritem):
+		
+		# Zapomnimo si gui in nastavimo izbran algoritem.
 		self.gui = gui
 		self.algoritem = algoritem
 		self.mislec = None
 		
 	def igraj(self):
-		self.mislec = threading.Thread(target=lambda:self.algoritem.izracunaj_potezo(self.gui.igra.kopija()))	
+		"""Metoda, ki prisili algoritem, da izračuna potezo."""
 		
+		self.mislec = threading.Thread(target=lambda:self.algoritem.izracunaj_potezo(self.gui.igra.kopija()))	
 		self.mislec.start()
 		
-		self.gui.igralna_deska.after(100, self.preveri_potezo)
-		
+		# Čez 100ms preverimo, ali že imamo potezo.
+		self.gui.main.after(100, self.preveri_potezo)
+
 	def preveri_potezo(self):
+		"""Metoda, ki preveri, ali že imamo potezo. Če jo imamo, jo opravimo, drugače se spet pokličemo."""
+		
 		if self.algoritem.poteza is not None:
 			if self.algoritem.poteza[0]:
 				self.gui.naredi_delitev()
@@ -704,17 +848,21 @@ class Racunalnik():
 					self.gui.naredi_potezo(self.algoritem.poteza[2], self.algoritem.poteza[1])
 				except: pass
 			
+			# Ker smo našli potezo, misleca ne rabimo več.
 			self.mislec = None
 		else:
-			self.gui.igralna_deska.after(100, self.preveri_potezo)
+			self.gui.main.after(100, self.preveri_potezo)
 			
 	def prekini(self):
+		"""Metoda, ki prekine misleca, če smo to zahtevali."""
+		
 		if self.mislec:
 			self.algoritem.prekini()
 			self.mislec.join()
 			self.mislec = None
 			
 	def klik(self, p):
+		# Se ne odzivamo na klike, ko razmišljamo.
 		pass
 	
 
@@ -722,7 +870,7 @@ class Racunalnik():
 #
 # Razred Minimax 
 #
-# Računalnik računa svoje poteze.
+# Računalnik računa svoje poteze z algoritmom Minimax
 #
 ##################################################################################################
 
@@ -746,25 +894,30 @@ class Minimax():
 		self.igra = igra
 		self.jaz = self.igra.na_potezi
 		self.prekinitev = False
-		self.poteza = None # Sem napišemo potezo, ki jo najdemo
-		# Poženemo minimax
+		
+		# Sem napišemo potezo, ki jo najdemo.
+		self.poteza = None
+		
+		# Poženemo minimax.
 		(poteza, vrednost) = self.minimax(self.globina, True)
+		
 		self.jaz = None
 		self.igra = None
+		
+		# Če nismo prekinili razmišljanja, lahko nastavimo potezo.
 		if not self.prekinitev:
 			time.sleep(2)
 			self.poteza = poteza
 			
-	# Vrednosti igra
+	# Vrednosti igre
 	ZMAGA = 1000000000
 	NESKONCNO = ZMAGA + 1
 	
 	def vrednost_pozicije(self):
-		"""Oceni vrednost pozicije po postopku: želimo, da bo po
-		opravljeni potezi čim večje število prstov na vseh rokah (0 prstov je 5)."""
+		"""Oceni vrednost pozicije po postopku: naši prsti so plus, nasprotnikovi minus."""
 		
 		stevilo_prstov = 0
-		#for igralec in self.igra.position:
+
 		for roka in self.igra.position[self.igra.na_potezi]:
 			if roka == 0:
 				stevilo_prstov -= 5
@@ -774,11 +927,15 @@ class Minimax():
 				stevilo_prstov += 5
 			else: stevilo_prstov += roka
 
+		# != self.jaz zato, ker je po opravljeni potezi nasprotnik na vrsti.
+		# Z uporabo negacije, 'smo spet mi'.
 		if self.igra.na_potezi != self.jaz:
 			return stevilo_prstov
 		else: return -stevilo_prstov
 		
 	def minimax(self, globina, maksimiziramo):
+		"""Glavna metoda algoritma."""
+		
 		if self.prekinitev:
 			return (None, 0)
 		if self.igra.je_konec():
@@ -841,16 +998,25 @@ class AlphaBeta():
 		self.poteza = None
 		
 	def prekini(self):
+		"""Metoda, ki jo pokliče GUI, če je treba nehati razmišljati, ker
+           je uporabnik zaprl okno ali izbral novo igro."""
+           
 		self.prekinitev = True
 		
 	def izracunaj_potezo(self, igra):
 		self.igra = igra
 		self.prekinitev = False
 		self.jaz = self.igra.na_potezi
+		
+		# Sem napišemo potezo, ki jo najdemo.
 		self.poteza = None
+		
+		# Poženemo alphabeta.
 		(poteza, vrednost) = self.alphabeta(self.globina, -AlphaBeta.NESKONCNO, AlphaBeta.NESKONCNO, True)
 		self.jaz = None
 		self.igra = None
+		
+		# Če nas niso prekinili, lahko nastavimo potezo.
 		if not self.prekinitev:
 			time.sleep(2)
 			self.poteza = poteza
@@ -859,11 +1025,10 @@ class AlphaBeta():
 	NESKONCNO = ZMAGA + 1
 	
 	def vrednost_pozicije(self):
-		"""Oceni vrednost pozicije po postopku: želimo, da bo po
-		opravljeni potezi čim večje število prstov na vseh rokah (0 prstov je 5)."""
+		"""Oceni vrednost pozicije po postopku: naši prsti so plus, nasprotnikovi minus."""
 		
 		stevilo_prstov = 0
-		#for igralec in self.igra.position:
+
 		for roka in self.igra.position[self.igra.na_potezi]:
 			if roka == 0:
 				stevilo_prstov -= 5
@@ -878,6 +1043,7 @@ class AlphaBeta():
 		else: return -stevilo_prstov
 			
 	def alphabeta(self, globina, alpha, beta, maksimiziramo):
+		"""Glavna metoda algoritma."""
 		
 		if self.prekinitev == True:
 			return (None, 0)
@@ -934,14 +1100,48 @@ class AlphaBeta():
 							
 				return (najboljsa_poteza, vrednost_najboljsa)
 				
-					
+def select_gui(master, current_game=None):
+	"""Funkcija, s katero lahko izberemo GUI med igro."""
+	
+	# Ustvarimo popup window
+	window = tk.Toplevel()
+	window.title("Izbira grafičnega vmesnika")
+	
+	msg = tk.Message(window, text="Prosim, izberi grafični vmesnik.\nOpozorilo: Trenutna igra bo prekinjena!")
+	msg.grid(row=0, columnspan=2)
+	
+	button_classic = tk.Button(window, text="Classic", command=lambda:select_gui_now("Classic", master, current_game, window))
+	button_classic.grid(row=1, column=0)
+	button_new = tk.Button(window, text="New", command=lambda:select_gui_now("New", master, current_game, window))
+	button_new.grid(row=1, column=1)
+	
+def select_gui_now(gui_type, master, current_game=None, window=None):
+	"""Funkcija, ki nastavi izbran GUI. To funkcijo kličemo tudi ob zagonu igrice."""
+	
+	# Če je slučajno kakšna igra v teku, prekinemo vse
+	# igralce in uničimo okno main.
+	if current_game != None:
+		current_game.prekini_igralce()
+		current_game.main.destroy()
+		
+	# Če je funkcijo klicala funkcija select_gui, moramo
+	# uničiti popup okno.
+	if window != None:
+		window.destroy()
+		
+	# Nastavimo in vrnemo željen GUI.
+	if gui_type == "Classic":
+		gui = Gui(master)
+	elif gui_type == "New":
+		gui = NewGui(master)
+	return gui
 				
 
 if __name__ == "__main__":
 	root = tk.Tk()
 	root.title("Prstki Beta")
 	
-	app = NewGui(root)
+	app = select_gui_now("New", root)
 	
 	root.mainloop()
 	
