@@ -15,6 +15,11 @@ import time
 IGRALEC_1 = 0
 IGRALEC_2 = 1
 
+MINIMAX_GLOBINA = 3
+MINIMAXpp_GLOBINA = 5
+ALPHABETA_GLOBINA = 7
+
+
 def nasprotnik(igralec):
 	"""Funkcija, ki vrne nasprotnika od igralca, ki je trenutno na potezi."""
 	
@@ -460,23 +465,38 @@ class NewGui():
 			if option2 == "Človek":
 				self.zacni_igro(Clovek(self), Clovek(self))
 			elif option2 == "Minimax":
-				self.zacni_igro(Clovek(self), Racunalnik(self, Minimax(globina=4)))
+				self.zacni_igro(Clovek(self), Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)))
 			elif option2 == "Minimax++":
-				self.zacni_igro(Clovek(self), Racunalnik(self, Minimax(globina=4)))
+				self.zacni_igro(Clovek(self), Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)))
+			elif option2 == "Alpha-Beta":
+				self.zacni_igro(Clovek(self), Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)))
 		elif option1 == "Minimax":
 			if option2 == "Človek":
-				self.zacni_igro(Racunalnik(self, Minimax(globina=3)), Clovek(self))
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)), Clovek(self))
 			elif option2 == "Minimax":
-				self.zacni_igro(Racunalnik(self, Minimax(globina=3)), Racunalnik(self, Minimax(globina=3)))
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)))
 			elif option2 == "Minimax++":
-				self.zacni_igro(Racunalnik(self, Minimax(globina=3)), Racunalnik(self, Minimax(globina=4)))
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)))
+			elif option2 == "Alpha-Beta":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)), Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)))
 		elif option1 == "Minimax++":
 			if option2 == "Človek":
-				self.zacni_igro(Racunalnik(self, Minimax(globina=3)), Clovek(self))
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)), Clovek(self))
 			elif option2 == "Minimax":
-				self.zacni_igro(Racunalnik(self, Minimax(globina=3)), Racunalnik(self, Minimax(globina=3)))
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)))
 			elif option2 == "Minimax++":
-				self.zacni_igro(Racunalnik(self, Minimax(globina=3)), Racunalnik(self, Minimax(globina=4)))
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)))
+			elif option2 == "Alpha-Beta":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)), Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)))
+		elif option1 == "Alpha-Beta":
+			if option2 == "Človek":
+				self.zacni_igro(Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)), Clovek(self))
+			elif option2 == "Minimax":
+				self.zacni_igro(Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAX_GLOBINA)))
+			elif option2 == "Minimax++":
+				self.zacni_igro(Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)), Racunalnik(self, Minimax(globina=MINIMAXpp_GLOBINA)))
+			elif option2 == "Alpha-Beta":
+				self.zacni_igro(Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)), Racunalnik(self, AlphaBeta(globina=ALPHABETA_GLOBINA)))	
 				
 	def zacni_igro(self, igralec1, igralec2):
 		""" Metoda, ki začne igro, torej nastavi izbrane igralce in uvodni UI."""
@@ -750,19 +770,6 @@ class Minimax():
 				else: stevilo_prstov += roka
 		return stevilo_prstov
 		
-#	def naslednje_pozicije(self, pozicija):
-#		trenutna_pozicija = [pozicija[i][:] for i in range(2)]
-#		seznam = []
-#		for (delitev, roka_napadalca, roka_napadenega) in self.veljavne_poteze():
-#			if delitev:
-#				self.opravi_delitev()
-#			self.opravi_potezo(roka_napadalca, roka_napadenega)
-#			seznam.append([self.position[i][:] for i in range(2)])
-#			self.razveljavi_potezo()
-#			if delitev:
-#				self.razveljavi_potezo()
-#		return seznam
-		
 	def minimax(self, globina, maksimiziramo):
 		if self.prekinitev:
 			return (None, 0)
@@ -801,6 +808,101 @@ class Minimax():
 							vrednost_najboljsa = vrednost
 							najboljsa_poteza = (delitev, roka_napadalca, roka_napadenega)
 				return (najboljsa_poteza, vrednost_najboljsa)
+
+###################################################################################################
+#
+# Razred AlphaBeta
+#
+###################################################################################################
+
+class AlphaBeta():
+	def __init__(self, globina):
+		self.globina = globina
+		self.prekinitev = False
+		self.igra = None
+		self.jaz = None
+		self.poteza = None
+		
+	def prekini(self):
+		self.prekinitev = True
+		
+	def izracunaj_potezo(self, igra):
+		self.igra = igra
+		self.prekinitev = False
+		self.jaz = self.igra.na_potezi
+		self.poteza = None
+		(poteza, vrednost) = self.alphabeta(self.globina, -AlphaBeta.NESKONCNO, AlphaBeta.NESKONCNO, True)
+		self.jaz = None
+		self.igra = None
+		if not self.prekinitev:
+			time.sleep(2)
+			self.poteza = poteza
+			
+	ZMAGA = 1000000000
+	NESKONCNO = ZMAGA + 1
+	
+	def vrednost_pozicije(self):
+		"""Oceni vrednost pozicije po postopku: želimo, da bo po
+		opravljeni potezi čim večje število prstov na vseh rokah (0 prstov je 5)."""
+		
+		stevilo_prstov = 0
+		for igralec in self.igra.position:
+			for roka in igralec:
+				if roka == 0:
+					stevilo_prstov += 5
+				else: stevilo_prstov += roka
+		if self.igra.na_potezi == self.jaz:
+			return stevilo_prstov
+		else:
+			return -stevilo_prstov
+			
+	def alphabeta(self, globina, alpha, beta, maksimiziramo):
+		
+		if self.prekinitev == True:
+			return (None, 0)
+		if self.igra.je_konec():
+			if self.igra.na_potezi != self.jaz:
+				return (None, AlphaBeta.ZMAGA)
+			else:
+				return (None, -AlphaBeta.ZMAGA)
+		elif self.igra.je_remi():
+			return (None, 0)
+		else:
+			if globina == 0:
+				return (None, self.vrednost_pozicije())
+			else:
+				if maksimiziramo:
+					najboljsa_poteza = None
+					vrednost_najboljsa = -AlphaBeta.NESKONCNO
+					for (delitev, roka_napadalca, roka_napadenega) in self.igra.veljavne_poteze():
+						self.igra.opravi_potezo(roka_napadalca, roka_napadenega)
+						vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
+						self.igra.razveljavi_potezo()
+						if vrednost > vrednost_najboljsa:
+							vrednost_najboljsa = vrednost
+							najboljsa_poteza = (delitev, roka_napadalca, roka_napadenega)
+						if vrednost > alpha:
+							alpha = vrednost
+						if beta <= alpha:
+							break
+				else:
+					najboljsa_poteza = None
+					vrednost_najboljsa = AlphaBeta.NESKONCNO
+					for (delitev, roka_napadalca, roka_napadenega) in self.igra.veljavne_poteze():
+						self.igra.opravi_potezo(roka_napadalca, roka_napadenega)
+						vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
+						self.igra.razveljavi_potezo()
+						if vrednost < vrednost_najboljsa:
+							vrednost_najboljsa = vrednost
+							najboljsa_poteza = (delitev, roka_napadalca, roka_napadenega)
+						if vrednost < beta:
+							beta = vrednost
+						if beta <= alpha:
+							break
+							
+				return (najboljsa_poteza, vrednost_najboljsa)
+				
+					
 				
 
 if __name__ == "__main__":
