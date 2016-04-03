@@ -127,7 +127,7 @@ class Igra():
 		
 		# Ugotovimo, ali lahko delitev opravimo.
 		self.je_veljavna_delitev()
-		
+
 		if self.moznost_delitve:	
 			# Shranimo pozicijo, če bi si slučajno premislili o delitvi.
 			self.shrani_pozicijo()

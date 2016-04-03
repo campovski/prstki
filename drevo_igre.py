@@ -1,6 +1,6 @@
 import re
 import igra
-x = igra.Igra(5,2)
+
 mnozica_potez = set()
 
 def narisi_drevo(globina, visina=0):
@@ -53,6 +53,8 @@ def naredi_dot_drevo(globina, prsti=5, roke=2):
 	''' Funkcija elemente množice mnozica_potez zapiše v datoteko drevo_igre.dot. '''
 	try: os.remove("drevo_igre.dot")
 	except: pass
+	global x
+	x = igra.Igra(prsti,roke)
 	narisi_drevo(globina)
 	izhod = open("drevo_igre.dot", "w")
 	izhod.write("digraph {\n       node [style = filled];\n")
@@ -64,10 +66,4 @@ def naredi_dot_drevo(globina, prsti=5, roke=2):
 			izhod.write("       \"#" + visina2 + "  " + koncno_vozlisce + "\" [color=coral];\n")
 	izhod.write("   }")
 
-#x.opravi_potezo(0,0)
-#x.opravi_potezo(0,0)
-#x.opravi_potezo(0,0)
-#x.opravi_potezo(1,0)
-#x.opravi_potezo(1,1)
-#x.opravi_potezo(1,1)
-naredi_dot_drevo(5)
+naredi_dot_drevo(1)

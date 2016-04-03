@@ -161,7 +161,7 @@ zacetek = najdi_vozlisca(2) # NE ZBRISI!!
 def vrni_mnozico_potez(mnozica=set(), seznam_zacetnih=[((1,1),(1,1))], k=0):
 	''' Mnozica vseh potez (trojic), ki jih lahko opravimo v igri. '''
 	k += 1
-	if k > 10:
+	if k > 2:
 		return mnozica.union(zacetek)
 	else:
 		return vrni_mnozico_potez((poteza_prvega_z_delitvijo(seznam_zacetnih))[1].union(poteza_drugega_z_delitvijo((poteza_prvega_z_delitvijo(seznam_zacetnih))[0])[1]),(poteza_drugega_z_delitvijo((poteza_prvega_z_delitvijo(seznam_zacetnih))[0]))[0], k)
