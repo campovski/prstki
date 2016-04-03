@@ -123,6 +123,7 @@ class Igra():
 		"""Metoda opravi delitev. Preverjanje, ali je delitev možna ali ne,
 		je potrebno narediti pred klicem same metode!"""
 		
+		self.je_veljavna_delitev()
 		if self.moznost_delitve:	
 			# Shranimo pozicijo, če bi si slučajno premislili o delitvi
 			#self.shrani_pozicijo()
