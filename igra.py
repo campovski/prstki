@@ -17,7 +17,7 @@ IGRALEC_2 = 1
 
 MINIMAX_GLOBINA = 3
 MINIMAXpp_GLOBINA = 5
-ALPHABETA_GLOBINA = 7
+ALPHABETA_GLOBINA = 5
 
 
 def nasprotnik(igralec):
@@ -697,9 +697,13 @@ class Racunalnik():
 			if self.algoritem.poteza[0]:
 				self.gui.naredi_delitev()
 			if self.gui.igra.na_potezi == IGRALEC_1:
-				self.gui.naredi_potezo(self.algoritem.poteza[1], self.algoritem.poteza[2])
+				try:
+					self.gui.naredi_potezo(self.algoritem.poteza[1], self.algoritem.poteza[2])
+				except: pass
 			else:
-				self.gui.naredi_potezo(self.algoritem.poteza[2], self.algoritem.poteza[1])
+				try:
+					self.gui.naredi_potezo(self.algoritem.poteza[2], self.algoritem.poteza[1])
+				except: pass
 			
 			self.mislec = None
 		else:
@@ -789,10 +793,13 @@ class Minimax():
 					najboljsa_poteza = None
 					vrednost_najboljsa = -Minimax.NESKONCNO
 					for (delitev, roka_napadalca, roka_napadenega) in self.igra.veljavne_poteze():
-						
+						if delitev:
+							self.igra.opravi_delitev()
 						self.igra.opravi_potezo(roka_napadalca, roka_napadenega)
 						vrednost = self.minimax(globina-1, not maksimiziramo)[1]
 						self.igra.razveljavi_potezo()
+						if delitev:
+							self.igra.razveljavi_potezo()
 						
 						if vrednost > vrednost_najboljsa:
 							vrednost_najboljsa = vrednost
@@ -801,9 +808,13 @@ class Minimax():
 					najboljsa_poteza = None
 					vrednost_najboljsa = Minimax.NESKONCNO
 					for (delitev, roka_napadalca, roka_napadenega) in self.igra.veljavne_poteze():
+						if delitev:
+							self.igra.opravi_delitev()
 						self.igra.opravi_potezo(roka_napadalca, roka_napadenega)
 						vrednost = self.minimax(globina-1, not maksimiziramo)[1]
 						self.igra.razveljavi_potezo()
+						if delitev:
+							self.igra.opravi_delitev()
 						
 						if vrednost < vrednost_najboljsa:
 							vrednost_najboljsa = vrednost
@@ -876,9 +887,13 @@ class AlphaBeta():
 					najboljsa_poteza = None
 					vrednost_najboljsa = -AlphaBeta.NESKONCNO
 					for (delitev, roka_napadalca, roka_napadenega) in self.igra.veljavne_poteze():
+						if delitev:
+							self.igra.opravi_delitev()
 						self.igra.opravi_potezo(roka_napadalca, roka_napadenega)
 						vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
 						self.igra.razveljavi_potezo()
+						if delitev:
+							self.igra.razveljavi_potezo()
 						if vrednost > vrednost_najboljsa:
 							vrednost_najboljsa = vrednost
 							najboljsa_poteza = (delitev, roka_napadalca, roka_napadenega)
@@ -890,9 +905,14 @@ class AlphaBeta():
 					najboljsa_poteza = None
 					vrednost_najboljsa = AlphaBeta.NESKONCNO
 					for (delitev, roka_napadalca, roka_napadenega) in self.igra.veljavne_poteze():
+						if delitev:
+							self.igra.opravi_delitev()
 						self.igra.opravi_potezo(roka_napadalca, roka_napadenega)
 						vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
 						self.igra.razveljavi_potezo()
+						if delitev:
+							self.igra.razveljavi_potezo()
+							
 						if vrednost < vrednost_najboljsa:
 							vrednost_najboljsa = vrednost
 							najboljsa_poteza = (delitev, roka_napadalca, roka_napadenega)
