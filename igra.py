@@ -592,9 +592,6 @@ class NewGui():
 			self.igra.opravi_potezo(roka_igralca1, roka_igralca2)
 		elif self.igra.na_potezi == IGRALEC_2:
 			self.igra.opravi_potezo(roka_igralca2, roka_igralca1)
-			
-		if isinstance(self.igralec_1, Racunalnik) and isinstance(self.igralec_2, Racunalnik):
-			time.sleep(5)
 		self.setup_ui()
 			
 	def naredi_delitev(self, event=None):
@@ -732,6 +729,7 @@ class Minimax():
 		self.jaz = None
 		self.igra = None
 		if not self.prekinitev:
+			time.sleep(2)
 			self.poteza = poteza
 			
 	# Vrednosti igra
