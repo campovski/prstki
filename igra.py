@@ -101,18 +101,12 @@ class Igra():
 		ali mora biti opravljena delitev, drugi zaporedno številko roke, s katero
 		je igralec napadel, tretji pa številko napadene roke."""
 		
-		# Odločimo se za eno implementacijo, torej z množico oziroma seznamom,
-		# bomo videli, kaj pride bolj prav (množica: lažje preveriti, ali je
-		# poteza med dovoljenimi - if poteza in poteze:...; seznam: lažje dostopati
-		# do točno določenih elementov, razporejeni so v nekem redu)
-		poteze = set()
 		poteze_arr = []
 		
 		# Dodamo poteze brez delitve
 		for roka_napadalca in range(self.roke):
 			for roka_napadenega in range(self.roke):
 				if self.je_veljavna_poteza(roka_napadalca, roka_napadenega):
-					poteze.add((False, roka_napadalca, roka_napadenega))
 					poteze_arr.append((False, roka_napadalca, roka_napadenega))
 				
 		# Če je možna delitev, dodamo še vse poteze z delitvijo. Preverimo
@@ -121,8 +115,7 @@ class Igra():
 		if self.moznost_delitve:
 			for roka_napadalca in range(self.roke):
 				for roka_napadenega in range(self.roke):
-					if roka_napadenega != 0:
-						poteze.add((True, roka_napadalca, roka_napadenega))
+					if self.position[nasprotnik(self.na_potezi)][roka_napadenega] != 0:
 						poteze_arr.append((True, roka_napadalca, roka_napadenega))
 		return poteze_arr
 						
@@ -522,6 +515,8 @@ class NewGui():
 		"""Metoda (na novo) vzpostavi celotno igralno desko in jo nastavi na izbrano pozicijo."""
 		
 		self.new_frame()
+		print(self.igra.veljavne_poteze())
+		print(self.igra.position)
 		
 		self.potrebno_opraviti = [None, None]
 		
@@ -765,11 +760,15 @@ class Minimax():
 		opravljeni potezi čim večje število prstov na vseh rokah (0 prstov je 5)."""
 		
 		stevilo_prstov = 0
-		for igralec in self.igra.position:
-			for roka in igralec:
-				if roka == 0:
-					stevilo_prstov += 5
-				else: stevilo_prstov += roka
+		#for igralec in self.igra.position:
+		for roka in self.igra.position[self.igra.na_potezi]:
+			if roka == 0:
+				stevilo_prstov += 5
+			else: stevilo_prstov += roka
+		for roka in self.igra.position[nasprotnik(self.igra.na_potezi)]:
+			if roka == 0:
+				stevilo_prstov -= 5
+			else: stevilo_prstov -= roka
 
 		if self.igra.na_potezi != self.jaz:
 			return stevilo_prstov
@@ -792,7 +791,8 @@ class Minimax():
 				if maksimiziramo:
 					najboljsa_poteza = None
 					vrednost_najboljsa = -Minimax.NESKONCNO
-					for (delitev, roka_napadalca, roka_napadenega) in self.igra.veljavne_poteze():
+					poteze = self.igra.veljavne_poteze()
+					for (delitev, roka_napadalca, roka_napadenega) in poteze:
 						if delitev:
 							self.igra.opravi_delitev()
 						self.igra.opravi_potezo(roka_napadalca, roka_napadenega)
@@ -807,7 +807,8 @@ class Minimax():
 				else: # Minimiziramo
 					najboljsa_poteza = None
 					vrednost_najboljsa = Minimax.NESKONCNO
-					for (delitev, roka_napadalca, roka_napadenega) in self.igra.veljavne_poteze():
+					poteze = self.igra.veljavne_poteze()
+					for (delitev, roka_napadalca, roka_napadenega) in poteze:
 						if delitev:
 							self.igra.opravi_delitev()
 						self.igra.opravi_potezo(roka_napadalca, roka_napadenega)
@@ -886,7 +887,8 @@ class AlphaBeta():
 				if maksimiziramo:
 					najboljsa_poteza = None
 					vrednost_najboljsa = -AlphaBeta.NESKONCNO
-					for (delitev, roka_napadalca, roka_napadenega) in self.igra.veljavne_poteze():
+					poteze = self.igra.veljavne_poteze()
+					for (delitev, roka_napadalca, roka_napadenega) in poteze:
 						if delitev:
 							self.igra.opravi_delitev()
 						self.igra.opravi_potezo(roka_napadalca, roka_napadenega)
@@ -904,7 +906,8 @@ class AlphaBeta():
 				else:
 					najboljsa_poteza = None
 					vrednost_najboljsa = AlphaBeta.NESKONCNO
-					for (delitev, roka_napadalca, roka_napadenega) in self.igra.veljavne_poteze():
+					poteze = self.igra.veljavne_poteze()
+					for (delitev, roka_napadalca, roka_napadenega) in poteze:
 						if delitev:
 							self.igra.opravi_delitev()
 						self.igra.opravi_potezo(roka_napadalca, roka_napadenega)
