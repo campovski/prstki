@@ -17,7 +17,7 @@ IGRALEC_2 = 1
 
 MINIMAX_GLOBINA = 3
 MINIMAXpp_GLOBINA = 5
-ALPHABETA_GLOBINA = 5
+ALPHABETA_GLOBINA = 7
 
 
 def nasprotnik(igralec):
@@ -122,6 +122,8 @@ class Igra():
 	def opravi_delitev(self):
 		"""Metoda opravi delitev. Preverjanje, ali je delitev možna ali ne,
 		je potrebno narediti pred klicem same metode!"""
+		
+		self.je_veljavna_delitev()
 		
 		if self.moznost_delitve:	
 			# Shranimo pozicijo, če bi si slučajno premislili o delitvi
@@ -528,9 +530,11 @@ class NewGui():
 		self.igralna_deska.grid()
 		self.igralna_deska.focus_set()
 		
-		self.igralna_deska.bind("<Button-1>", self.deska_klik)
-		self.igralna_deska.bind("<Button-3>", self.naredi_delitev)
-		self.igralna_deska.bind("<BackSpace>", self.razveljavi)
+		if (self.igra.na_potezi == IGRALEC_1 and isinstance(self.igralec_1, Clovek))\
+			or (self.igra.na_potezi == IGRALEC_2 and isinstance(self.igralec_2, Clovek)):
+			self.igralna_deska.bind("<Button-1>", self.deska_klik)
+			self.igralna_deska.bind("<Button-3>", self.naredi_delitev)
+			self.igralna_deska.bind("<BackSpace>", self.razveljavi)
 		
 		for roka in range(self.roke):			
 			x = NewGui.DIFF_KROGCI
@@ -763,12 +767,12 @@ class Minimax():
 		#for igralec in self.igra.position:
 		for roka in self.igra.position[self.igra.na_potezi]:
 			if roka == 0:
-				stevilo_prstov += 5
-			else: stevilo_prstov += roka
-		for roka in self.igra.position[nasprotnik(self.igra.na_potezi)]:
-			if roka == 0:
 				stevilo_prstov -= 5
 			else: stevilo_prstov -= roka
+		for roka in self.igra.position[nasprotnik(self.igra.na_potezi)]:
+			if roka == 0:
+				stevilo_prstov += 5
+			else: stevilo_prstov += roka
 
 		if self.igra.na_potezi != self.jaz:
 			return stevilo_prstov
@@ -859,15 +863,19 @@ class AlphaBeta():
 		opravljeni potezi čim večje število prstov na vseh rokah (0 prstov je 5)."""
 		
 		stevilo_prstov = 0
-		for igralec in self.igra.position:
-			for roka in igralec:
-				if roka == 0:
-					stevilo_prstov += 5
-				else: stevilo_prstov += roka
-		if self.igra.na_potezi == self.jaz:
+		#for igralec in self.igra.position:
+		for roka in self.igra.position[self.igra.na_potezi]:
+			if roka == 0:
+				stevilo_prstov -= 5
+			else: stevilo_prstov -= roka
+		for roka in self.igra.position[nasprotnik(self.igra.na_potezi)]:
+			if roka == 0:
+				stevilo_prstov += 5
+			else: stevilo_prstov += roka
+
+		if self.igra.na_potezi != self.jaz:
 			return stevilo_prstov
-		else:
-			return -stevilo_prstov
+		else: return -stevilo_prstov
 			
 	def alphabeta(self, globina, alpha, beta, maksimiziramo):
 		
