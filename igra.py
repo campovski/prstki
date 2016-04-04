@@ -185,7 +185,7 @@ class Gui():
 		menu_options = tk.Menu(menu)
 		menu.add_cascade(label="Moznosti", menu=menu_options)
 		menu_options.add_command(label="Spremeni graficni vmesnik", command=lambda:select_gui(self.master, self))
-		menu_options.add_command(label="Help", command=self.help)
+		menu_options.add_command(label="Pomoc", command=self.help)
 		
 		# Nastavimo igralca na clovek, da lahko v izbira_igre lazje
 		# klicemo prekini_igralce.
@@ -213,7 +213,7 @@ class Gui():
 		self.option2.set("Minimax")
 
 		# Ustvarimo labele, entryje, gumbe...
-		label_hello = tk.Label(self.main, text="Hello human, please select who the players shall be!")
+		label_hello = tk.Label(self.main, text="Pozdravljen, človek! Prosim izberi igralce.")
 		label_roke = tk.Label(self.main, text="ROKE: ")
 		self.entry_roke = tk.Entry(self.main, width=WDTH_ENTRY)
 		label_prsti = tk.Label(self.main, text="PRSTI: ")
@@ -485,7 +485,7 @@ class NewGui():
 		menu_options = tk.Menu(menu)
 		menu.add_cascade(label="Moznosti", menu=menu_options)
 		menu_options.add_command(label="Spremeni graficni vmesnik", command=lambda:select_gui(self.master, self))
-		menu_options.add_command(label="Help", command=self.help)
+		menu_options.add_command(label="Pomoc", command=self.help)
 		
 		# Nastavimo igralca na clovek, da lahko v izbira_igre lazje
 		# klicemo prekini_igralce.
@@ -513,7 +513,7 @@ class NewGui():
 		self.option2.set("Clovek")
 
 		# Ustvarimo labele, entryje, gumbe...
-		label_hello = tk.Label(self.main, text="Hello human, please select who the players shall be!")
+		label_hello = tk.Label(self.main, text="Pozdravljen, človek! Prosim izberi igralce.")
 		label_roke = tk.Label(self.main, text="ROKE: ")
 		self.entry_roke = tk.Entry(self.main, width=WDTH_ENTRY)
 		label_prsti = tk.Label(self.main, text="PRSTI: ")
