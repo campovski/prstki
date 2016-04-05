@@ -723,8 +723,26 @@ class NewGui():
 			igralec = IGRALEC_2
 		
 		if igralec != None:
+			tmp = self.potrebno_opraviti[igralec]
 			roka = (int(y) - NewGui.DIFF_KROGCI//2)//(NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI)
-			self.potrebno_opraviti[igralec] = roka
+			if self.igra.position[igralec][roka] != 0:
+				self.potrebno_opraviti[igralec] = roka
+			
+			# Narisemo kvadrat okoli izbrane roke.
+			if tmp != None and tmp != roka:
+				self.igralna_deska.delete(self.rectangle)
+			if igralec == IGRALEC_1:
+				x1 = NewGui.DIFF_KROGCI // 2
+				y1 = roka * (NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI) + NewGui.DIFF_KROGCI//4
+				x2 = x1 + (NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI) * self.prsti
+				y2 = y1 + NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI * 0.7
+			elif igralec == IGRALEC_2:
+				x1 = self.WDTH_CANVAS - NewGui.DIFF_KROGCI // 2
+				y1 = roka * (NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI) + NewGui.DIFF_KROGCI//4
+				x2 = x1 - (NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI) * self.prsti
+				y2 = y1 + NewGui.OVAL_SIZE + NewGui.DIFF_KROGCI * 0.7
+			if self.igra.position[igralec][roka] != 0:
+				self.rectangle = self.igralna_deska.create_rectangle(x1, y1, x2, y2, width=1.5)
 			
 			# Ce sta izbrani obe roki, opravimo potezo.
 			if self.potrebno_opraviti[IGRALEC_1] != None and self.potrebno_opraviti[IGRALEC_2] != None:
