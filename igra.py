@@ -668,7 +668,10 @@ class NewGui():
 		
 		# Preverimo, ali je konec igre, remi.
 		if self.igra.je_konec():
-			self.napis = tk.Label(self.main, text="KONEC IGRE!\nZmagal je igralec {}".format(nasprotnik(self.igra.na_potezi)+1))
+			if self.igra.na_potezi == IGRALEC_1:
+				self.napis = tk.Label(self.main, text="KONEC IGRE!\nZmagal je ZELENI.")
+			elif self.igra.na_potezi == IGRALEC_2:
+				self.napis = tk.Label(self.main, text="KONEC IGRE!\nZmagal je RDECI.")
 			self.igralna_deska.unbind("<Button-1>")
 			self.igralna_deska.unbind("<Button-3>")
 			self.igralna_deska.unbind("<BackSpace")
@@ -680,7 +683,10 @@ class NewGui():
 			self.igralna_deska.unbind("<BackSpace")
 			self.prekini_igralce()
 		else:
-			self.napis = tk.Label(self.main, text="Na potezi je Igralec {}".format(self.igra.na_potezi+1))
+			if self.igra.na_potezi == IGRALEC_1:
+				self.napis = tk.Label(self.main, text="Na potezi je RDECI.")
+			elif self.igra.na_potezi == IGRALEC_2:
+				self.napis = tk.Label(self.main, text="Na potezi je ZELENI.")
 			if self.igra.na_potezi == IGRALEC_1:
 				self.igralec_1.igraj()
 			elif self.igra.na_potezi == IGRALEC_2:
